@@ -1,0 +1,30 @@
+<meta http-equiv="refresh" content="15">
+
+<%
+queue = DB.fetch("""
+SELECT si.id, si.name, si.gateway, si.last_replay_uploaded_at, si.last_s2gsq_at, now()
+FROM `esdb_identities` pi, esdb_identity_identities ii, esdb_identities si
+WHERE pi.`provider_id` IS NOT NULL AND (ii.right_id = pi.`id` AND ii.left_id = si.id) AND si.character_code is not null AND si.character_code > 0
+AND 
+(si.last_s2gsq_at IS NULL OR
+ (si.last_s2gsq_at IS NOT NULL AND si.last_replay_uploaded_at - si.last_s2gsq_at > 0))
+ORDER by si.last_replay_uploaded_at asc
+""")
+%>
+
+<h1>S2GS queue as of <%= Time.now %></h1>
+<pre>
+<%= queue.count %> elements.
+<%= Hirb::Helpers::AutoTable.render(queue) %>
+</pre>
+<pre>
+<%= Hirb::Helpers::AutoTable.render(DB.fetch("""
+SELECT si.id, si.name, si.gateway, si.last_replay_uploaded_at, si.last_s2gsq_at, now()
+FROM esdb_identities si
+WHERE si.character_code is not null AND si.character_code > 0 AND si.gateway = 'xx'
+AND
+(si.last_s2gsq_at IS NULL OR
+(si.last_s2gsq_at IS NOT NULL AND si.last_replay_uploaded_at - si.last_s2gsq_at > 0))
+ORDER by si.last_replay_uploaded_at asc
+""")) %>
+</pre>

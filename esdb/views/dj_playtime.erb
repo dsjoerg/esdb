@@ -1,0 +1,18 @@
+<%
+result = []
+query = """
+select date(m.played_at) as thedate, sum(m.duration_seconds) / (1.4 * 3600.0) as hrs_played
+from esdb_matches m,
+     esdb_sc2_match_entities me,
+     esdb_identity_entities ie
+     where ie.entity_id = me.id and
+           ie.identity_id = ? and
+           me.match_id = m.id
+group by date(m.played_at)
+order by date(m.played_at) asc
+"""
+DB.fetch(query, params[:id]) do |row|
+  result << [row[:thedate], row[:hrs_played]]
+end
+%>
+<%= result.to_json %>

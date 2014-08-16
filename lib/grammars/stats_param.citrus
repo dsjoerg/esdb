@@ -1,0 +1,55 @@
+# Parses the stats= param for /stats (StatBuilder)
+#
+#
+# stats=metric1(args1),metric2(args2)
+# stats=apm(avg:[conditions]),...
+#
+# e.g.: apm(avg,sum),wpm(mavg)
+
+grammar StatsParam
+  # Matching it like this is easy to traverse, even though every stat has an
+  # additional node.
+  rule stats
+    (stat sep*)*
+  end
+
+  rule stat
+    metric (paren args paren)*
+  end
+
+  rule bracket
+    '[' | ']'
+  end
+
+  rule paren
+    '(' | ')'
+  end
+
+  rule arg
+    calc:([ \w]+) (':' bracket conditions bracket)*
+  end
+
+  rule args
+    (arg sep*)*
+  end
+
+  rule condition
+    [ \w\>\<\d\!\-]+
+  end
+
+  rule conditions
+    (condition sep*)*
+  end
+
+  rule sep
+    ','
+  end
+
+  rule metric
+    [ \w\d\.]+
+  end
+
+  rule space
+    [ \t]*
+  end
+end

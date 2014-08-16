@@ -1,0 +1,3 @@
+[submodule "ggpyjobs_public"]
+	path = vendor/ggpyjobs
+	url = git://github.com/dsjoerg/ggpyjobs.git

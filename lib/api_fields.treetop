@@ -1,0 +1,40 @@
+# Again - I'm sorry if you're proficient in Treetop/EPG because this must seem
+# like an abortion to you. Will eventually go crazy on the refactoring.
+
+grammar ApiFields
+  rule fieldset
+    ([\-\+a-z_]* '(' fieldset fields ')' {
+      def all
+        [fieldset] + fields.elements
+      end
+      
+      def to_ah
+        prefix = elements[0].text_value.to_s[0].to_s.match(/[\+\-]/) ? elements[0].text_value[0] : ''
+        key = prefix.blank? ? elements[0].text_value.to_s : elements[0].text_value.to_s[1..-1]
+        if prefix == '-'
+          {key => false}
+        else
+          if all.any?
+            hsh = {}
+            arr = all.collect{|e| e.respond_to?(:to_ah) ? hsh.merge!(e.to_ah) : nil}
+
+            {key => hsh}
+          else
+            "dead"
+          end
+        end
+      end
+    } / [\-\+a-z_]* {
+      def to_ah
+        prefix = text_value.to_s[0].to_s.match(/[\+\-]/) ? text_value.to_s[0] : ''
+        key = prefix.blank? ? text_value.to_s : text_value.to_s[1..-1]
+        {key => prefix == '-' ? false : true}
+        # text_value
+      end
+    })
+  end
+  
+  rule fields
+    (',' fieldset)*
+  end
+end

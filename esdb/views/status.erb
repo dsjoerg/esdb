@@ -1,0 +1,40 @@
+<h1>Recent # of summaries processed that matter to users</h1>
+<pre>
+<%= Hirb::Helpers::AutoTable.render(DB.fetch("""
+select date(first_seen_at), count(distinct s.identity_id), count(*)
+from esdb_sc2_match_summaries s, esdb_matches m
+where s.match_id = m.id
+and m.replays_count = 1
+and first_seen_at > '2013-05-06'
+and played_at < '2013-05-06'
+group by date(first_seen_at)
+order by date(first_seen_at) desc
+""").all, :max_width => 1000) %>
+</pre>
+
+<h1>Query performance</h1>
+<p><a href="https://rpm.newrelic.com/accounts/212843/applications/1114437#end_user_data=visible">New Relic ggtracker</a></p>
+<p><a href="https://rpm.newrelic.com/accounts/212843/applications/1100302">New Relic ESDB</a></p>
+
+<h1>overall</h1>
+  <% proidents = ESDB::Identity.where(~{:provider_id => nil}) %>
+<ul>
+  <li><b># provider identities: </b><%= proidents.count %></li>
+  <li><b># replays: </b><%= Sc2::Match::Replay.count %></li>
+</ul>
+
+
+
+<% ['us','eu','sea','kr','tw','cn','xx'].each do |gateway| %>
+
+<h4><%= gateway %></h1>
+
+<ul>
+  <li><b>Total provider identities linked to identity: </b><%= DB.fetch("SELECT count(*) FROM `esdb_identities` pi, esdb_identity_identities ii, esdb_identities si WHERE pi.`provider_id` IS NOT NULL  AND (ii.left_id = si.`id` AND ii.right_id = pi.id) AND si.gateway = '#{gateway}'").first.values[0] %></li>
+  <li><b>Total provider identities linked to identity with character code: </b><%= DB.fetch("SELECT count(*) FROM `esdb_identities` pi, esdb_identity_identities ii, esdb_identities si WHERE pi.`provider_id` IS NOT NULL  AND (ii.right_id = pi.`id` AND ii.left_id = si.id) AND si.gateway = '#{gateway}' AND si.character_code is not null AND si.character_code > 0").first.values[0] %></li>
+  <% summs = Sc2::Match::Summary.where(:gateway => gateway) %>
+  <li><b>Total Summaries: </b><%= summs.count %></li>
+  <li><b>Total Matches: </b><%= ESDB::Match.where(:gateway => gateway).count %></li>
+</ul>
+
+<% end %>
