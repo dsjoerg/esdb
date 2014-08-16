@@ -1,6 +1,8 @@
 ### Introduction
 
-WTF is this
+WTF is this?
+
+It's not ready for public consumption yet.  Don't read this.  Please delete your computer.
 
 
 ### Requirements
