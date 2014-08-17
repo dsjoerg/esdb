@@ -3,11 +3,12 @@
 ESDB is the API server for GGTracker.  It is also involved in replay processing.
 
 The other codebases used in GGTracker are:
-* https://github.com/dsjoerg/ggtracker <-- the web server and HTML/CSS/Javascript
-* https://github.com/dsjoerg/ggpyjobs <-- the replay-parsing python server
-* https://github.com/dsjoerg/gg <-- little gem for accessing ESDB
-
-It's not ready for public consumption yet.  Don't read this.  Please delete your computer.
+* https://github.com/dsjoerg/ggtracker <-- the web server and
+  HTML/CSS/Javascript for the site
+* https://github.com/dsjoerg/ggpyjobs <-- the replay-parsing python
+  server, included by ESDB as a git submodule
+* https://github.com/dsjoerg/gg <-- little gem for accessing ESDB,
+  used by the ggtracker codebase
 
 
 ### Requirements
@@ -45,6 +46,16 @@ On Mac OSX, you can use homebrew as package manager: http://mxcl.github.com/home
 ### Starting
 
 `foreman start`
+
+Then open your browser to http://localhost:9292/
+If you see "Hello World!" then the ESDB server is running, congrats!
+
+Next try opening this URL: http://localhost:9292/api/v1/spending_skill/am/protoss
+If you get a bunch of JSON spending skill data, then it really is working.
+
+Next is to try uploading a replay; for that, you'll need to install
+the [ggtracker](https://github.com/dsjoerg/ggtracker) webserver on
+your dev box.
 
 
 ### Testing
