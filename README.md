@@ -57,6 +57,9 @@ Next is to try uploading a replay; for that, you'll need to install
 the [ggtracker](https://github.com/dsjoerg/ggtracker) webserver on
 your dev box.
 
+If you run into any problems, please let me know -- it's probably my
+fault and I'll be happy to help you out!
+
 
 ### Testing
 
