@@ -26,8 +26,6 @@ On Mac OSX, you can use homebrew as package manager: http://mxcl.github.com/home
 
 ### Basic installation and updating
 
-The first steps that should be done when checking out a fresh copy:
-
  * Run Bundler (`bundle`)
  * Copy and adjust database configuration (`cp config/database.yml.example config/database.yml`)
  * Create the database esdb needs, and the test database (`mysql -u root` and then `create database esdb_development; create database esdb_test` and then `quit`)
@@ -35,6 +33,7 @@ The first steps that should be done when checking out a fresh copy:
  * Copy and adjust fog configuration (`cp config/fog.rb.example config/fog.rb`)
  * Copy and adjust redis configuration (`cp config/redis.yml.example config/redis.yml`)
  * Copy and adjust esdb configuration (`cp config/esdb.yml.example config/esdb.yml`)
+ * Copy and adjust tokens configuration (`cp config/tokens.yml.example config/tokens.yml`)
  * Run migrations: `bundle exec sequel -m db/migrations -e development config/database.yml`
  * Initialize the ggpyjobs submodule with `rake py:init`
  * Run migrations on test: `bundle exec sequel -m db/migrations -e test config/database.yml`
