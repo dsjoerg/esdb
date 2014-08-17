@@ -183,6 +183,8 @@ describe ESDB::Sc2::Identity do
     end
 
     it 'should stow away raw BnetScraper data in a Blob' do
+      pending "this spec currently broken (issue #1), may be a legitimate bug in bnet_scraper. bnet_scraper.scrape is called in esdb/games/sc2/identity.rb line 525, and the result comes back with no value for current_solo_league."
+
       identity = stubbed_identity
       identity.scrape!(:bnet)
 
