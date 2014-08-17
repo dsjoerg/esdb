@@ -24,17 +24,19 @@ It's not ready for public consumption yet.  Don't read this.  Please delete your
 On Mac OSX, you can use homebrew as package manager: http://mxcl.github.com/homebrew/
 
 
-### Basic installation and updating
+### Installation and setup
 
  * Run Bundler (`bundle`)
  * Copy and adjust database configuration (`cp config/database.yml.example config/database.yml`)
  * Create the database esdb needs, and the test database (`mysql -u root` and then `create database esdb_development; create database esdb_test` and then `quit`)
- * Copy and adjust S3 configuration (`cp config/s3.yml.example config/s3.yml`)
- * Copy and adjust fog configuration (`cp config/fog.rb.example config/fog.rb`)
+ * Copy S3 configuration and put your AWS credentials and bucket names in it (`cp config/s3.yml.example config/s3.yml`)
+ * Copy fog configuration and put your AWS credentials and bucket names in it (`cp config/fog.rb.example config/fog.rb`)
  * Copy and adjust redis configuration (`cp config/redis.yml.example config/redis.yml`)
  * Copy and adjust esdb configuration (`cp config/esdb.yml.example config/esdb.yml`)
- * Copy and adjust tokens configuration (`cp config/tokens.yml.example config/tokens.yml`)
+ * Copy tokens configuration (`cp config/tokens.yml.example config/tokens.yml`)
  * Run migrations: `bundle exec sequel -m db/migrations -e development config/database.yml`
+ * Import the data needed for Spending Skill: `cat db/replays_sq_skill_stat.sql | mysql -u root -D esdb_development`
+ * Set up an API identity for the ggtracker web server: `cat db/ggtracker_provider.sql | mysql -u root -D esdb_development`
  * Initialize the ggpyjobs submodule with `rake py:init`
  * Run migrations on test: `bundle exec sequel -m db/migrations -e test config/database.yml`
  * Verify your install with rspec `bundle exec rspec`
@@ -48,18 +50,6 @@ On Mac OSX, you can use homebrew as package manager: http://mxcl.github.com/home
 ### Testing
 
 bundle exec rspec
-
-
-
-### OAuth2, Authentication, Client Application, Provider Identification
-
-For ggtracker development you will need a ggtracker Provider with the access token 'development'. If you didn't use one of the dumps including this, make sure to create it:
-
-$ tux
->> Provider.create(:name => 'ggtracker', :access_token => 'development', :callback_url => 'http://localhost:3000/esdb')
-
-Or if you prefer SQL: 
-INSERT INTO esdb_providers (name, access_token, callback_url) VALUES ('ggtracker', 'development', 'http://localhost:3000/esdb');
 
 
 ### Security
