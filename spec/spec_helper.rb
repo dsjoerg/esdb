@@ -29,7 +29,7 @@ RSpec.configure do |conf|
   end
 end
 
-# Factories, duh!
+# Factories
 FactoryGirl.find_definitions
 
 # Mocking web requests
@@ -45,17 +45,7 @@ class WebMock::RequestSignature
 end
 
 
-# Fixtures, all here for now
-
-# ESDB::Provider::Identity.fixture {{
-#   :name => (name = /\w+/.gen),
-#   :entities => 10.of {ESDB::Sc2::Match::Entity.make}
-# }}
-# 
-# ESDB::Sc2::Identity.fixture {{
-#   :name => (name = /\w+/.gen),
-#   :entities => 10.of {ESDB::Sc2::Match::Entity.make}
-# }}
+# Fixtures/Factories
 
 ESDB::Identity.factory do
   name Randgen.name
@@ -72,15 +62,6 @@ ESDB::Provider::Identity.factory do
   include_factory ESDB::Identity.factory
 end
 
-# 
-# ESDB::Sc2::Match::Entity.fixture {{
-#   :apm => rand(320),
-#   :wpm => rand(200).to_f/100.0,
-#   :replay => ESDB::Sc2::Match::Replay.make,
-#   :win => rand(100) > 50,
-#   :race => ['Z', 'P', 'T'][rand(3)]
-# }}
-
 ESDB::Sc2::Match::Entity.factory do
   apm     rand(320)
   wpm     rand(200).to_f/100.0
@@ -88,14 +69,6 @@ ESDB::Sc2::Match::Entity.factory do
   win     rand(100) > 50
   race    ['Z', 'P', 'T'][rand(3)]
 end
-
-# 
-# ESDB::Sc2::Match::Replay.fixture {{
-#   :played_at => Time.now,
-#   :processed_at => Time.now,
-#   :md5 => Digest::MD5.hexdigest(Time.now.to_f.to_s)
-# }}
-# 
 
 ESDB::Match.factory do
   played_at     Time.now
@@ -105,5 +78,6 @@ ESDB::Sc2::Match::Replay.factory do
   processed_at  Time.now
   md5           Digest::MD5.hexdigest(Time.now.to_f.to_s)
   match         ESDB::Match.make
+  hidden        0
 end
 
