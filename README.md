@@ -69,3 +69,9 @@ bundle exec rspec
 ### Security
 
 If you see any security problems, please let me know ASAP!  Thx :)
+
+
+### I don't understand XXXX
+
+Just ask, I'll add questions and answers to a FAQ here.
+
