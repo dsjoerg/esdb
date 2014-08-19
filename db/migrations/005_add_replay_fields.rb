@@ -34,7 +34,7 @@ Sequel.migration do
       add_column(:team, Integer)
       add_column(:chosen_race, String, :size=>1)
       add_column(:color, String, :size=>6)
-      add_column(:armies_by_frame, String, :size=>1000000)
+      add_column(:armies_by_frame, String, :size=>100)
       # drop_index(:replay_id)
       rename_column(:replay_id, :match_id)
       add_index [:match_id], :name=>:match_id
