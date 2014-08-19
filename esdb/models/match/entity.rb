@@ -32,7 +32,7 @@ class ESDB::Match::Entity < Sequel::Model(:esdb_sc2_match_entities)
   def to_builder(options = {})
     builder = options[:builder] || jbuilder(options)
     builder.(self, :id, :wpm, :apm, :spending_skill, :win, :race, :team, :color, :race_macro,
-             :sat_1_skill, :sat_2_skill, :sat_3_skill, :saturation_skill, :max_creep_spread)
+             :sat_1_skill, :sat_2_skill, :sat_3_skill, :saturation_skill, :max_creep_spread, :action_latency_real_seconds)
     builder.identity sc2_identity.to_builder.attributes! if sc2_identity
     builder.spending_quotient summary.spending_quotient if summary
     
