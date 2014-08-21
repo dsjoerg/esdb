@@ -63,7 +63,8 @@ fault and I'll be happy to help you out!
 
 ### Testing
 
-bundle exec rspec
+* Run migrations on test: `bundle exec sequel -m db/migrations -e test config/database.yml`
+* `bundle exec rspec`
 
 
 ### Security
