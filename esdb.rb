@@ -178,6 +178,7 @@ require 'esdb/games'
 # DJ cesspool
 require 'esdb/playerstats'
 require 'esdb/djstat_builder'
+require 'esdb/scout_builder'
 
 # StatBuilder
 require 'esdb/stat_builder'

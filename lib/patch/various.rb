@@ -12,6 +12,13 @@ class FalseClass
   end
 end
 
+# num.round(2) barfs on me when num is nil.  well f u ruby!
+class NilClass
+  def round(ndigits=nil)
+    nil
+  end
+end
+
 
 # I'm done with this.. the only thing it's good for, is display on the web
 # UI and our deployment flushes the workers anyway. So.. 
