@@ -10,7 +10,7 @@ class ESDB::ScoutBuilder
 
   def self.do_it()
 
-    header_row = ['match_id', 'race', 'win', 'chosen_race', 'apm', 'action_latency_real_seconds', 'spending_skill', 'race_macro']
+    header_row = ['match_id', 'identity_id', 'race', 'win', 'chosen_race', 'apm', 'action_latency_real_seconds', 'spending_skill', 'race_macro']
     [1,2,3].each {|benchmark|
       header_row << 'mineral_sat_' + benchmark.to_s
       header_row << 'gas_sat_' + benchmark.to_s
@@ -28,7 +28,7 @@ class ESDB::ScoutBuilder
       csv << header_row
       
       DB.fetch("""
-select e.match_id, e.race, e.win, e.chosen_race, e.apm, e.spending_skill, e.race_macro, e.action_latency_real_seconds, ees.miningbase_2, ees.miningbase_3,
+select e.match_id, eie.identity_id, e.race, e.win, e.chosen_race, e.apm, e.spending_skill, e.race_macro, e.action_latency_real_seconds, ees.miningbase_2, ees.miningbase_3,
 ees.mineral_saturation_1, ees.gas_saturation_1, ees.worker22x_1,
 ees.mineral_saturation_2, ees.gas_saturation_2, ees.worker22x_2,
 ees.mineral_saturation_3, ees.gas_saturation_3, ees.worker22x_3,
@@ -48,7 +48,9 @@ mrm25.armystrength as25, mrm25.u0 w25,
 mrm30.armystrength as30, mrm30.u0 w30
 from   
 ( select id, game_type, category, vs_ai, expansion from esdb_matches where played_at > '#{PLAYDATE}' ) rm,
-esdb_entity_stats ees, esdb_sc2_match_entities e
+esdb_entity_stats ees,
+esdb_identity_entities eie,
+esdb_sc2_match_entities e
 left join  esdb_sc2_match_replay_minutes mrm4 on e.id = mrm4.entity_id  and mrm4.minute = 4 
 left join  esdb_sc2_match_replay_minutes mrm5 on e.id = mrm5.entity_id  and mrm5.minute = 5 
 left join  esdb_sc2_match_replay_minutes mrm6 on e.id = mrm6.entity_id  and mrm6.minute = 6 
@@ -65,13 +67,14 @@ left join  esdb_sc2_match_replay_minutes mrm25 on e.id = mrm25.entity_id  and mr
 left join  esdb_sc2_match_replay_minutes mrm30 on e.id = mrm30.entity_id  and mrm30.minute = 30 
 where e.match_id = rm.id and
       ees.entity_id = e.id and
+      eie.entity_id = e.id and
       rm.game_type = '1v1' and
       rm.category = 'Ladder' and
       rm.vs_ai = 0 and
       rm.expansion = 1
   limit #{N * 2}
 """) {|ent|
-        csv_row = [ent[:match_id], ent[:race], ent[:win], ent[:chosen_race], ent[:apm].to_i,
+        csv_row = [ent[:match_id], ent[:identity_id], ent[:race], ent[:win], ent[:chosen_race], ent[:apm].to_i,
                    ent[:action_latency_real_seconds].round(3),
                    ent[:spending_skill].round(1),
                    ent[:race_macro].to_i]
