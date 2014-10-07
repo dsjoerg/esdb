@@ -1,6 +1,6 @@
 require 'csv'
 
-N = 1000000
+LIMIT_CLAUSE = false ? 'limit 50' : ''
 PLAYDATE = '2014-08-01'
 
 
@@ -10,7 +10,60 @@ class ESDB::ScoutBuilder
 
   def self.do_it()
 
-    header_row = ['match_id', 'identity_id', 'race', 'win', 'chosen_race', 'apm', 'action_latency_real_seconds', 'spending_skill', 'race_macro']
+    header_row = ['entity_id', 'minute', 'as']
+    0.upto(19).each{|unitnum|
+      header_row << 'u' + unitnum.to_s
+    }
+
+    CSV.open('/tmp/minutes.csv', 'wb') { |csv|
+      csv << header_row
+
+      [4,5,6,7,8,9,10,12,14,16,18,20,25,30].each {|time|
+      
+      DB.fetch("""
+select mrm.entity_id, mrm.minute, mrm.armystrength,
+mrm.u0,
+mrm.u1,
+mrm.u2,
+mrm.u3,
+mrm.u4,
+mrm.u5,
+mrm.u6,
+mrm.u7,
+mrm.u8,
+mrm.u9,
+mrm.u10,
+mrm.u11,
+mrm.u12,
+mrm.u13,
+mrm.u14,
+mrm.u15,
+mrm.u16,
+mrm.u17,
+mrm.u18,
+mrm.u19
+from esdb_matches m, esdb_sc2_match_replay_minutes mrm, esdb_sc2_match_entities e
+where mrm.entity_id = e.id and
+      e.match_id = m.id and
+      m.played_at > '#{PLAYDATE}' and
+      m.game_type = '1v1' and
+      m.category = 'Ladder' and
+      m.vs_ai = 0 and
+      m.expansion = 1 and
+      mrm.minute = #{time}
+  #{LIMIT_CLAUSE}
+""") {|minute|
+        csv_row = [minute[:entity_id], minute[:minute], minute[:armystrength]]
+        0.upto(19).each{|unitnum|
+          csv_row << minute[('u' + unitnum.to_s).to_sym]
+        }
+        csv << csv_row 
+      }
+    }
+    }
+
+
+    header_row = ['match_id', 'identity_id', 'entity_id', 'race', 'win', 'chosen_race', 'apm', 'action_latency_real_seconds', 'spending_skill', 'race_macro']
     [1,2,3].each {|benchmark|
       header_row << 'mineral_sat_' + benchmark.to_s
       header_row << 'gas_sat_' + benchmark.to_s
@@ -19,52 +72,20 @@ class ESDB::ScoutBuilder
     [2,3].each {|benchmark|
       header_row << 'miningbase_' + benchmark.to_s
     }
-    [4,5,6,7,8,9,10,12,14,16,18,20,25,30].each {|minute|
-      header_row << 'as' + minute.to_s
-      header_row << 'w' + minute.to_s
-    }
 
     CSV.open('/tmp/ents.csv', 'wb') { |csv|
       csv << header_row
       
       DB.fetch("""
-select e.match_id, eie.identity_id, e.race, e.win, e.chosen_race, e.apm, e.spending_skill, e.race_macro, e.action_latency_real_seconds, ees.miningbase_2, ees.miningbase_3,
+select e.match_id, eie.identity_id, e.id, e.race, e.win, e.chosen_race, e.apm, e.spending_skill, e.race_macro, e.action_latency_real_seconds, ees.miningbase_2, ees.miningbase_3,
 ees.mineral_saturation_1, ees.gas_saturation_1, ees.worker22x_1,
 ees.mineral_saturation_2, ees.gas_saturation_2, ees.worker22x_2,
-ees.mineral_saturation_3, ees.gas_saturation_3, ees.worker22x_3,
-mrm4.armystrength as4, mrm4.u0 w4,
-mrm5.armystrength as5, mrm5.u0 w5,
-mrm6.armystrength as6, mrm6.u0 w6,
-mrm7.armystrength as7, mrm7.u0 w7,
-mrm8.armystrength as8, mrm8.u0 w8,
-mrm9.armystrength as9, mrm9.u0 w9,
-mrm10.armystrength as10, mrm10.u0 w10,
-mrm12.armystrength as12, mrm12.u0 w12,
-mrm14.armystrength as14, mrm14.u0 w14,
-mrm16.armystrength as16, mrm16.u0 w16,
-mrm18.armystrength as18, mrm18.u0 w18,
-mrm20.armystrength as20, mrm20.u0 w20,
-mrm25.armystrength as25, mrm25.u0 w25,
-mrm30.armystrength as30, mrm30.u0 w30
+ees.mineral_saturation_3, ees.gas_saturation_3, ees.worker22x_3
 from   
 ( select id, game_type, category, vs_ai, expansion from esdb_matches where played_at > '#{PLAYDATE}' ) rm,
 esdb_entity_stats ees,
 esdb_identity_entities eie,
 esdb_sc2_match_entities e
-left join  esdb_sc2_match_replay_minutes mrm4 on e.id = mrm4.entity_id  and mrm4.minute = 4 
-left join  esdb_sc2_match_replay_minutes mrm5 on e.id = mrm5.entity_id  and mrm5.minute = 5 
-left join  esdb_sc2_match_replay_minutes mrm6 on e.id = mrm6.entity_id  and mrm6.minute = 6 
-left join  esdb_sc2_match_replay_minutes mrm7 on e.id = mrm7.entity_id  and mrm7.minute = 7 
-left join  esdb_sc2_match_replay_minutes mrm8 on e.id = mrm8.entity_id  and mrm8.minute = 8 
-left join  esdb_sc2_match_replay_minutes mrm9 on e.id = mrm9.entity_id  and mrm9.minute = 9 
-left join  esdb_sc2_match_replay_minutes mrm10 on e.id = mrm10.entity_id  and mrm10.minute = 10 
-left join  esdb_sc2_match_replay_minutes mrm12 on e.id = mrm12.entity_id  and mrm12.minute = 12 
-left join  esdb_sc2_match_replay_minutes mrm14 on e.id = mrm14.entity_id  and mrm14.minute = 14 
-left join  esdb_sc2_match_replay_minutes mrm16 on e.id = mrm16.entity_id  and mrm16.minute = 16 
-left join  esdb_sc2_match_replay_minutes mrm18 on e.id = mrm18.entity_id  and mrm18.minute = 18 
-left join  esdb_sc2_match_replay_minutes mrm20 on e.id = mrm20.entity_id  and mrm20.minute = 20 
-left join  esdb_sc2_match_replay_minutes mrm25 on e.id = mrm25.entity_id  and mrm25.minute = 25 
-left join  esdb_sc2_match_replay_minutes mrm30 on e.id = mrm30.entity_id  and mrm30.minute = 30 
 where e.match_id = rm.id and
       ees.entity_id = e.id and
       eie.entity_id = e.id and
@@ -72,9 +93,9 @@ where e.match_id = rm.id and
       rm.category = 'Ladder' and
       rm.vs_ai = 0 and
       rm.expansion = 1
-  limit #{N * 2}
+  #{LIMIT_CLAUSE}
 """) {|ent|
-        csv_row = [ent[:match_id], ent[:identity_id], ent[:race], ent[:win], ent[:chosen_race], ent[:apm].to_i,
+        csv_row = [ent[:match_id], ent[:identity_id], ent[:id], ent[:race], ent[:win], ent[:chosen_race], ent[:apm].to_i,
                    ent[:action_latency_real_seconds].round(3),
                    ent[:spending_skill].round(1),
                    ent[:race_macro].to_i]
@@ -85,10 +106,6 @@ where e.match_id = rm.id and
         }
         [2,3].each {|benchmark|
           csv_row << ent[('miningbase_' + benchmark.to_s).to_sym]
-        }
-        [4,5,6,7,8,9,10,12,14,16,18,20,25,30].each {|minute|
-          csv_row << ent[('as' + minute.to_s).to_sym]
-          csv_row << ent[('w' + minute.to_s).to_sym]
         }
         csv << csv_row 
       }
@@ -118,6 +135,8 @@ where m.map_id = map.id and
         csv << csv_row
       }
     }
+
+
 
     nil
 

@@ -21,6 +21,7 @@ The other codebases used in GGTracker are:
  * Curl
  * imagemagick (http://www.imagemagick.org/)
  * An Amazon S3 account
+ * pip (https://pip.pypa.io/en/latest/installing.html#id7)
  
 On Mac OSX, you can use homebrew as package manager: http://mxcl.github.com/homebrew/
 
