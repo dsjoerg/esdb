@@ -193,6 +193,9 @@ class ESDB::Sc2::Match
     FOREVER = 16 * 60 * 60 * 10 # 10 hours, ie it never happened
 
     def self.compute_saturation_skill_benchmarks
+
+      start_date = Date.today - 180
+
       result = {}
       query = """
 select ees.highest_league, e1.race as race, e2.race as vs_race,
@@ -208,7 +211,7 @@ where m.category = 'Ladder'
   and m.gateway != 'xx'
   and m.vs_ai = 0
   and e1.id != e2.id
-  and m.played_at > '2013-05-06'
+  and m.played_at > '#{start_date.strftime('%Y%m%d')}'
   and e1.match_id = m.id
   and e2.match_id = m.id
   and e1.id = ees.entity_id
