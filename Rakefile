@@ -219,8 +219,9 @@ namespace :py do
     puts "$ git submodule update --init"
     puts %x{git submodule update --init}
 
-    puts "vendor/ggpyjobs$ echo \"w\" | pip install -r requirements.txt"
-    puts %x{cd vendor/ggpyjobs; echo "w" | pip install -r requirements.txt; cd ../..}
+    pip_install_cmd = "pip install -r requirements.txt --allow-external pil --allow-unverified pil"
+    puts "vendor/ggpyjobs$ echo \"w\" | #{ pip_install_cmd }"
+    puts %x{cd vendor/ggpyjobs; echo "w" | #{ pip_install_cmd }; cd ../..}
   end
 
   # IMPORTANT: this is for development, not for deployment.
@@ -238,7 +239,8 @@ namespace :py do
     puts "vendor/ggpyjobs$ git checkout master && git pull"
     puts %x{cd vendor/ggpyjobs; git checkout master && git pull; cd ../..}
 
-    puts "vendor/ggpyjobs$ echo \"s\" | pip install -r requirements.txt"
-    puts %x{cd vendor/ggpyjobs; echo "s" | pip install -r requirements.txt; cd ../..}
+    pip_install_cmd = "pip install -r requirements.txt --allow-external pil --allow-unverified pil"
+    puts "vendor/ggpyjobs$ echo \"w\" | #{ pip_install_cmd }"
+    puts %x{cd vendor/ggpyjobs; echo "w" | #{ pip_install_cmd }; cd ../..}
   end
 end
