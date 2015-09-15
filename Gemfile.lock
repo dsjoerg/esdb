@@ -142,10 +142,7 @@ GEM
     polyglot (0.3.3)
     prawn (0.8.4)
       prawn-core (>= 0.8.4, < 0.9)
-      prawn-core (>= 0.8.4, < 0.9)
       prawn-layout (>= 0.8.4, < 0.9)
-      prawn-layout (>= 0.8.4, < 0.9)
-      prawn-security (>= 0.8.4, < 0.9)
       prawn-security (>= 0.8.4, < 0.9)
     prawn-core (0.8.4)
     prawn-layout (0.8.4)
@@ -321,3 +318,6 @@ DEPENDENCIES
   unicorn
   webmock
   yajl-ruby
+
+BUNDLED WITH
+   1.10.5
