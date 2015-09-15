@@ -170,3 +170,11 @@ gem 'statsample'
 
 # Security advisory! 20131204
 gem 'i18n', '>= 0.6.6'
+
+# Security advisory! 20150803
+#
+# Never mind. The security problems are specific to XML which we do
+# not process from external sources.  And getting nokogiri installed
+# properly on my OS X box is a royal pain.
+#
+#gem 'nokogiri', '>= 1.6.3'
