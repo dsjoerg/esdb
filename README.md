@@ -66,6 +66,7 @@ fault and I'll be happy to help you out!
 
 * Run migrations on test: `bundle exec sequel -m db/migrations -e test config/database.yml`
 * `bundle exec rspec`
+# run a specific spec: `bundle exec rspec spec/sc2_identity_spec.rb:91`
 
 
 ### Security
