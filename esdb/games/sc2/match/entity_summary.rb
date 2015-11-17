@@ -40,19 +40,27 @@ class ESDB::Match::EntitySummary < Sequel::Model(:esdb_sc2_match_summary_players
           #  be the average of the range (min-5, min+5).  We believe in linear SQ
           #  there.
           (5 + SMOOTHING_WINDOW).upto(29 - SMOOTHING_WINDOW).each { |minutes|
-            smoothmin = minutes - SMOOTHING_WINDOW
-            smoothmax = minutes + SMOOTHING_WINDOW
-            smoothme = (smoothmin..smoothmax).collect{|sample|
-              entry = sq_skill_table[gateway][sample][race][league]
-              if entry.nil?
-                nil
-              else 
-                entry[0]
-              end
-            }
-            smoothme.reject!{|x| x.nil?}
-            smoothed = smoothme.inject(:+) / smoothme.size
-            smoothed_table[gateway][minutes][race][league] = [smoothed, sq_skill_table[gateway][minutes][race][league][1]]
+            smoothed = nil
+            begin
+              smoothmin = minutes - SMOOTHING_WINDOW
+              smoothmax = minutes + SMOOTHING_WINDOW
+              smoothme = (smoothmin..smoothmax).collect{|sample|
+                entry = sq_skill_table[gateway][sample][race][league]
+                if entry.nil?
+                  nil
+                else 
+                  entry[0]
+                end
+              }
+              smoothme.reject!{|x| x.nil?}
+              smoothed = smoothme.inject(:+) / smoothme.size
+              entry = sq_skill_table[gateway][minutes][race][league]
+              smoothed_table[gateway][minutes][race][league] = [smoothed, entry[1]]
+            rescue Exception
+              # if we dont have data
+              smoothed_table[gateway][minutes][race][league] = [smoothed, 0]
+            end
+              
           }
           (29 - (SMOOTHING_WINDOW - 1)).upto(29).each { |minutes|
             smoothed_table[gateway][minutes][race][league] = sq_skill_table[gateway][minutes][race][league]
@@ -91,7 +99,7 @@ class ESDB::Match::EntitySummary < Sequel::Model(:esdb_sc2_match_summary_players
   # map from gateway to a
   # map from game-duration-in-minutes (5...29 inclusive) to a
   # map of race char (as a capital letter) to a
-  # map of league number to average-SQ-for-a-league
+  # map of league number to [average-SQ-for-a-league, # of games]
   #
   def self.get_sq_skill_table
     if @@sq_skill_table.nil? || (Resque.redis.get('sq_should_nuke') == 'YES')
