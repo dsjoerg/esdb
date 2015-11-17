@@ -102,9 +102,9 @@ where m.category = 'Ladder'
   and m.game_type = '1v1'
   and m.gateway != 'xx'
   and m.vs_ai = 0
-  and m.expansion = 1
+  and m.expansion = 2
   and e1.id != e2.id
-  and m.played_at > '2013-05-06'
+  and m.played_at > '2015-11-09'
   and e1.match_id = m.id
   and e2.match_id = m.id
   and e1.id = ees.entity_id
@@ -130,11 +130,12 @@ where ps.entity_id = e.id and
       m.gateway is not null and
       m.game_type = '1v1' and
       m.category = 'Ladder' and
+      m.expansion = 2 and
       resource_collection_rate > 100 and
       average_unspent_resources > 0 and
       duration_seconds >= 270 and
       duration_seconds < 1800 and
-      m.played_at > '2013-06-12'
+      m.played_at > '2015-11-09'
 group by m.gateway, highest_league, mins, race
 order by m.gateway, highest_league, mins asc, race
 """,
