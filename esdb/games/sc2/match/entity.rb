@@ -210,6 +210,7 @@ where m.category = 'Ladder'
   and m.game_type = '1v1'
   and m.gateway != 'xx'
   and m.vs_ai = 0
+  and m.expansion = 2
   and e1.id != e2.id
   and m.played_at > '#{start_date.strftime('%Y%m%d')}'
   and e1.match_id = m.id
