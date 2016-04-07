@@ -16,7 +16,7 @@ class ESDB::Match::EntitySummary < Sequel::Model(:esdb_sc2_match_summary_players
 
   def spending_quotient
     return nil if average_unspent_resources.nil? || resource_collection_rate.nil? || average_unspent_resources == 0
-    35.0 * (0.00137 * (resource_collection_rate / 1.36) - Math.log(average_unspent_resources)) + 240
+    35.0 * (0.00137 * resource_collection_rate - Math.log(average_unspent_resources)) + 240
   end
 
 
