@@ -77,7 +77,7 @@ gem 'citrus'
 # unfortunately EY's engineyard/bin/resque script makes it well-nigh
 #  impossible to pass an env variable through to resque itself.
 #
-gem 'resque', :git => 'git@github.com:ggtracker/resque.git', :ref => '60f2d6c223b511ce8a52125a8103a375e86f429c'
+gem 'resque', :git => 'https://github.com/ggtracker/resque.git', :ref => '60f2d6c223b511ce8a52125a8103a375e86f429c'
 
 # Status/metadata for jobs
 gem 'resque-status'
@@ -87,7 +87,7 @@ gem 'resque-job-stats'
 
 # Round-robining
 gem 'resque-dynamic-queues'
-gem 'resque-round-robin', :git => 'git@github.com:ggtracker/resque-round-robin.git'
+gem 'resque-round-robin', :git => 'https://github.com/ggtracker/resque-round-robin.git'
 #gem 'resque-round-robin', :path => '/Users/david/Dropbox/Programming/resque-round-robin'
 
 
@@ -101,7 +101,7 @@ gem 'memcached'
 gem 'jbuilder'
 
 # Curb for curl bindings
-gem 'curb'
+gem 'curb', '0.8.5'
 
 # Appoxy's AWS gem
 # I decided to use it over here because we currently don't need to integrate
@@ -112,7 +112,7 @@ gem 'curb'
 gem 'aws'
 
 # Our agoragames/bnet_scraper fork, see ggtracker Gemfile
-gem 'bnet_scraper', :git => 'git@github.com:ggtracker/bnet_scraper.git', :ref => 'battlenetify'
+gem 'bnet_scraper', :git => 'https://github.com/ggtracker/bnet_scraper.git', :ref => 'battlenetify'
 # gem 'bnet_scraper', :path => '/Users/mr/dev/ruby/gems/bnet_scraper/'
 
 # Using ActiveSupport >3 for helpers like the Numeric/Time extensions
