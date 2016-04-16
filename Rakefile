@@ -220,7 +220,7 @@ namespace :py do
     puts "$ git submodule update --init"
     puts %x{git submodule update --init}
 
-    pip_install_cmd = "pip install -r requirements.txt --allow-external pil --allow-unverified pil"
+    pip_install_cmd = "sudo pip install -r requirements.txt --allow-external pil --allow-unverified pil"
     puts "vendor/ggpyjobs$ echo \"w\" | #{ pip_install_cmd }"
     puts %x{cd vendor/ggpyjobs; echo "w" | #{ pip_install_cmd }; cd ../..}
   end
@@ -240,7 +240,7 @@ namespace :py do
     puts "vendor/ggpyjobs$ git checkout master && git pull"
     puts %x{cd vendor/ggpyjobs; git checkout master && git pull; cd ../..}
 
-    pip_install_cmd = "pip install -r requirements.txt --allow-external pil --allow-unverified pil"
+    pip_install_cmd = "sudo pip install -r requirements.txt --allow-external pil --allow-unverified pil"
     puts "vendor/ggpyjobs$ echo \"w\" | #{ pip_install_cmd }"
     puts %x{cd vendor/ggpyjobs; echo "w" | #{ pip_install_cmd }; cd ../..}
   end
