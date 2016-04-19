@@ -1,3 +1,4 @@
 [submodule "vendor/ggpyjobs"]
 	path = vendor/ggpyjobs
 	url = https://github.com/dsjoerg/ggpyjobs.git
+	branch = master
