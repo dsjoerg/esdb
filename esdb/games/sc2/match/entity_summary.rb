@@ -19,7 +19,15 @@ class ESDB::Match::EntitySummary < Sequel::Model(:esdb_sc2_match_summary_players
     35.0 * (0.00137 * resource_collection_rate - Math.log(average_unspent_resources)) + 240
   end
 
-
+  MIN_MINUTES = 4
+  MAX_MINUTES = 22
+  def self.MIN_MINUTES
+    return MIN_MINUTES
+  end
+  def self.MAX_MINUTES
+    return MAX_MINUTES
+  end
+  
   SMOOTHING_WINDOW = 5
   SS_REGIONS = ['us','eu']
 
@@ -27,19 +35,19 @@ class ESDB::Match::EntitySummary < Sequel::Model(:esdb_sc2_match_summary_players
     smoothed_table = {}
     SS_REGIONS.each { |gateway|
       smoothed_table[gateway] = {}
-      5.upto(29).each { |minutes|
+      MIN_MINUTES.upto(MAX_MINUTES).each { |minutes|
         smoothed_table[gateway][minutes] = {'P'=>{}, 'T'=>{}, 'Z'=>{}}
       }
       ['P','T','Z'].each { |race|
         0.upto(6).each { |league|
-          5.upto(5 + SMOOTHING_WINDOW - 1).each { |minutes|
+          MIN_MINUTES.upto(MIN_MINUTES + SMOOTHING_WINDOW - 1).each { |minutes|
             smoothed_table[gateway][minutes][race][league] = sq_skill_table[gateway][minutes][race][league]
           }
 
           # smoothing part 1: for minutes 10 through 24, set the SQ to
           #  be the average of the range (min-5, min+5).  We believe in linear SQ
           #  there.
-          (5 + SMOOTHING_WINDOW).upto(29 - SMOOTHING_WINDOW).each { |minutes|
+          (MIN_MINUTES + SMOOTHING_WINDOW).upto(MAX_MINUTES - SMOOTHING_WINDOW).each { |minutes|
             smoothed = nil
             begin
               smoothmin = minutes - SMOOTHING_WINDOW
@@ -62,11 +70,11 @@ class ESDB::Match::EntitySummary < Sequel::Model(:esdb_sc2_match_summary_players
             end
               
           }
-          (29 - (SMOOTHING_WINDOW - 1)).upto(29).each { |minutes|
+          (MAX_MINUTES - (SMOOTHING_WINDOW - 1)).upto(MAX_MINUTES).each { |minutes|
             smoothed_table[gateway][minutes][race][league] = sq_skill_table[gateway][minutes][race][league]
           }
         }
-        5.upto(29).each { |minutes|
+        MIN_MINUTES.upto(MAX_MINUTES).each { |minutes|
           max_sq = 0
           0.upto(6).each { |league|
             # smoothing part 2: SQ must never go the wrong way as a function of league.
@@ -97,7 +105,7 @@ class ESDB::Match::EntitySummary < Sequel::Model(:esdb_sc2_match_summary_players
   #
   # sq_skill_table is a
   # map from gateway to a
-  # map from game-duration-in-minutes (5...29 inclusive) to a
+  # map from game-duration-in-minutes (MIN_MINUTES...MAX_MINUTES inclusive) to a
   # map of race char (as a capital letter) to a
   # map of league number to [average-SQ-for-a-league, # of games]
   #
@@ -106,13 +114,13 @@ class ESDB::Match::EntitySummary < Sequel::Model(:esdb_sc2_match_summary_players
       @@sq_skill_table = {}
       SS_REGIONS.each { |gateway|
         @@sq_skill_table[gateway] = {}
-        5.upto(29).each { |minutes|
+        MIN_MINUTES.upto(MAX_MINUTES).each { |minutes|
           @@sq_skill_table[gateway][minutes] = {'P'=>{}, 'T'=>{}, 'Z'=>{}}
         }
       }
       num_rows=0
       # TODO put SS_REGIONS into this query dammit
-      DB.fetch("select * from replays_sq_skill_stat where mins >= 5 and mins <= 29 and gateway in ('us','eu')") do |row|
+      DB.fetch("select * from replays_sq_skill_stat where mins >= #{MIN_MINUTES} and mins <= #{MAX_MINUTES} and gateway in ('us','eu')") do |row|
         num_rows = num_rows + 1
         avg_sq_to_league = @@sq_skill_table[row[:gateway]][row[:mins].to_i][row[:race]]
         avg_sq_to_league[row[:league].to_i] = [row[:SQ].to_f, row['count(*)'.to_sym].to_i]
@@ -151,8 +159,8 @@ class ESDB::Match::EntitySummary < Sequel::Model(:esdb_sc2_match_summary_players
     # see sq_skill_table comment
     ist = self.class.get_sq_skill_table
 
-    return nil if minutes < 5
-    minutes = 29 if minutes > 29
+    return nil if minutes < MIN_MINUTES
+    minutes = MAX_MINUTES if minutes > MAX_MINUTES
 
     # until we have spending-skill data for these regions, we'll just
     # use EU.

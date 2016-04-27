@@ -25,7 +25,7 @@ class ESDB::API
         0.upto(6).each { |league|
           leagueSQ = []
           leagueCounts = []
-          5.upto(29).each { |minutes|
+          ESDB::Match::EntitySummary.MIN_MINUTES.upto(ESDB::Match::EntitySummary.MAX_MINUTES).each { |minutes|
             sq_stats = ist[params[:gateway]][minutes][params[:race]][league]
             if sq_stats.present?
               leagueSQ << sq_stats[0]
@@ -42,6 +42,11 @@ class ESDB::API
         result["totalgames"] = totalgames
         result.to_json
       end
+    end
+
+    get '/should_nuke' do
+      Resque.redis.set('sq_should_nuke', 'YES')
+      "done"
     end
   end
 end
