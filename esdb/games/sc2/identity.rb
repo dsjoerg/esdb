@@ -367,12 +367,6 @@ where ident.id = #{id}
 
     # scrape no more than once per second
     def we_can_scrape_sc2ranks?
-      now = Time.now.to_i
-      lastscrape = Resque.redis.get('sc2ranks_last_scrape').to_i
-      if lastscrape.nil? || now > lastscrape
-        Resque.redis.set('sc2ranks_last_scrape', now)
-        return true
-      end
       return false
     end
 
@@ -380,152 +374,14 @@ where ident.id = #{id}
       return self.enqueue!(source) if enqueue
       return nil if gateway == 'xx'
 
-      # If we're not on a region that supports english, we default the source
-      # to sc2ranks (which scrapes :bnet at the end as well, for portrait and
-      # other language independant data.)
-      if !source
-        source = :bnet
-
-        if bnet_scraper        
-          if bnet_region_info = bnet_scraper.region_info
-            source = :sc2ranks if bnet_region_info[:locale] != 'en'
-          end
-        else
-          source = :sc2ranks
-        end
-      end
+      source = :bnet
 
       case source.to_s.downcase.to_sym
-      when :sc2ranks
-        # For reasons why we're not using any of the public sc2ranks gems, see
-        # Gemfile.
-
-        raise "source is :sc2ranks but sc2ranks_url is false" if !sc2ranks_url
-
-        # TODO dont sleep when it's not necessary, and 
-        # dont let multiple workers flood sc2ranks, and
-        # batch many requests together via mass API
-
-        if ratelimit && !we_can_scrape_sc2ranks?
-          ESDB.log("Not hitting SC2Ranks for #{id} due to rate limit")
-          if redirect
-            return self.scrape!(:bnet)
-          end
-
-          raise Sc2Ranks::NotAvailableNowError
-        end
-
-        response = Curl.get(URI.encode(sc2ranks_url))
-        if response.status[0..2].to_i == 200
-          data = JSON.parse(response.body_str)
-
-          # Stow the raw returned data away for later use
-          ESDB::Blob.create(:data => data.to_s, :created_at => Time.now, :source => sc2ranks_url)
-        else
-          ESDB.log("Got response status #{response.status} from sc2ranks for identity #{id}")
-          if redirect
-            return self.scrape!(:bnet)
-          end
-
-          raise Sc2Ranks::BadResponseCodeError
-        end
-
-        if !data || data['error'] && data['error'] == 'no_character'
-          if redirect
-            return self.scrape!(:bnet)
-          end
-
-          raise Sc2Ranks::InvalidProfileError 
-        end
-
-        if data['portrait']        
-          _portrait_id = (data['portrait']['icon_id'] * 36) + 
-            (data['portrait']['row'] * 6) + data['portrait']['column']
-          _portrait = BnetScraper::Starcraft2::PORTRAITS.flatten(1)[_portrait_id]
-        else
-          _portrait = nil
-        end
-
-        self.set_all({
-          :achievement_points => data['achievement_points'],
-          :portrait           => _portrait,
-          :last_scraped_at    => Time.now
-        })
-
-        # The only legitimate _source_ of names are replays.
-        # battle.net can _confirm_ a name but not provide it.
-        #
-        # sc2ranks provides names, but it's not clear exactly what the
-        # logic for their updated_at field is.  It's probably the time
-        # of their latest successful battle.net scrape.  But who
-        # knows?!  So that makes it a little risky to play with
-        # sc2ranks.
-        #
-        # It's also not clear when, if ever, we would benefit by
-        # overwriting a name that we got from a replay with a new name
-        # from sc2ranks.  It's theoretically possible -- we might not
-        # have any recent replays for someone, but sc2ranks somehow
-        # has their new name -- but whatever.
-        #
-        if !self.has_a_name?
-          self.name = data['name']
-          self.name_valid_at = data['updated_at']
-          self.name_source = 'sc2ranks'
-        end
-
-        # The character codes might be outdated or wrong, but better than
-        # nothing, right?
-        if !self.character_code && data['character_code'] && data['character_code'] > 0
-          self.character_code = data['character_code'] 
-        end
-
-        # Update leagues (and data that only is in teams, such as fav_race)
-        if data['teams'] && data['teams'].any?
-
-          current_highest = {}
-          current_highest_rank = {}
-          types = [1,2,3,4].collect {|num| num.to_s + "v" + num.to_s}
-          types.each { |type| current_highest[type] = -1 }
-
-          data['teams'].each do |team|
-            type = "#{team['bracket']}v#{team['bracket']}"
-            league = team['league']
-
-            if current_highest[type] < league_index(league)
-              current_highest[type] = league_index(league)
-              current_highest_rank[type] = team['division_rank'].to_i
-            end
-            if (current_highest[type] == league_index(league) &&
-                current_highest_rank[type] > team['division_rank'].to_i)
-              current_highest_rank[type] = team['division_rank'].to_i
-            end
-          end
-
-          set_league_info(types, current_highest, current_highest_rank)
-
-        end
-
-        save
-
-        # Let's make this easy for now: instead of just scraping sc2ranks, we
-        # always also scrape battle.net.
-        # We don't scrape battle.net first because we want the information that
-        # we CAN get from battle.net for foreign languages should still 
-        # supersede older sc2ranks info (e.g., the portrait)
-        self.scrape!(:bnet) if redirect
-
       when :bnet
         raise BnetScraper::InvalidProfileError, "source is :bnet but bnet_scraper is false" if !bnet_scraper
 
-        # Attempt to salvage InvalidProfileError in case of name changes by
-        # scraping from sc2ranks with Unknown name (see sc2ranks_url)
-        begin
-          sleep 0.1
-          data = bnet_scraper.scrape
-        rescue BnetScraper::InvalidProfileError => e
-          return scrape!(:sc2ranks, false, false) if redirect
-          raise e # re-raise if we don't want a redirect
-        end
+        sleep 0.1
+        data = bnet_scraper.scrape
         
         # Stow the raw returned data away for later use
         ESDB::Blob.create(:data => data.to_s, :created_at => Time.now, :source => profile_url)
