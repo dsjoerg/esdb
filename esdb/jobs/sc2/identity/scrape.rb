@@ -34,7 +34,9 @@ module ESDB::Jobs
           # If successful - send callbacks to all providers
           # Now sends the entire object instead of just the identifying info
           identity.providers.each do |provider|
-            provider.callback(:identity_update, identity.to_builder.attributes!)
+            if provider.present?
+              provider.callback(:identity_update, identity.to_builder.attributes!)
+            end
           end
         else
           ESDB.log("Scraping failed for identity #{identity.id}")
