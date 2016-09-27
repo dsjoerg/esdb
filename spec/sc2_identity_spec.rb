@@ -107,26 +107,6 @@ describe ESDB::Sc2::Identity do
       identity.most_played_race.should == nil  # as of 20130221 we cannot retrieve most_played_race anymore. semantics of battle.net profile have changed, refactor needed.
     end
 
-    it 'should scrape all league information from sc2ranks' do
-      identity = stubbed_identity
-      identity.delete             # this is necessary so that other tests dont contaminate our identity information
-      identity = stubbed_identity
-
-      # the second false is important, tells scrape! to only scrape
-      # sc2ranks
-      identity.scrape!(:sc2ranks, false, false, false)
-
-      identity.current_league_1v1.should == 3
-      identity.current_league_2v2.should == 4
-      identity.current_league_3v3.should == 4
-      identity.current_league_4v4.should == 4
-      identity.current_rank_1v1.should == 11
-      identity.current_rank_2v2.should == 35
-      identity.current_rank_3v3.should == 53
-      identity.current_rank_4v4.should == 10
-      identity.most_played_race.should == nil   #sc2ranks doesnt retrieve most played race
-    end
-
     it 'shouldnt freak out when sc2ranks doesnt have portrait info' do
       identity = stubbed_identity
       identity.delete             # this is necessary so that other tests dont contaminate our identity information
