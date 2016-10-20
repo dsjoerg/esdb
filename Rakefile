@@ -152,42 +152,6 @@ order by m.gateway, highest_league, mins asc, race
   end
 end
 
-def check_s2gs_pop
-  last_pop = Time.at(Resque.redis.get('mon:queue:pop').to_i)
-
-  # ERROR
-  # The windows task runs every hour, if you get two of these, there's a 
-  # problem.
-  if (Time.now - last_pop) > 30.minutes
-    warnstr = "THE WORLD IS ENDING"
-    ESDB.error(warnstr)
-    return
-  end
-
-  # WARN
-  if (Time.now - last_pop) > 5.minutes
-    warnstr = "5 minutes since last s2gs pop - s2gs_client might be dead"
-    ESDB.warn(warnstr)
-    return
-  end
-end
-
-# Various monitoring tasks
-namespace :mon do
-  desc "Notifies humans about no queue/pop happening, suggesting the s2gs_client being down"
-  task :s2gspop do
-    check_s2gs_pop
-  end
-
-  desc "Runs all monitoring tasks"
-  task :all do
-    tasks = [:s2gspop]
-    tasks.each do |t|
-      Rake::Task["mon:#{t.to_s}"].execute
-    end
-  end
-end
-
 namespace :api do
   desc "Displays all API methods."
   task :routes do
