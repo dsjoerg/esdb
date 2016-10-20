@@ -135,7 +135,8 @@ where ps.entity_id = e.id and
       average_unspent_resources > 0 and
       duration_seconds >= 270 and
       duration_seconds < 1800 and
-      m.played_at > '2015-11-09'
+      m.played_at > '2015-11-09' and
+      e.race in ('P','T','Z')
 group by m.gateway, highest_league, mins, race
 order by m.gateway, highest_league, mins asc, race
 """,
